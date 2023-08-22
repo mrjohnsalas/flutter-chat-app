@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../helpers/show_alert.dart';
+import '../services/services.dart';
 import '../widgets/widgets.dart';
 
 class RegisterPage extends StatelessWidget {
@@ -44,10 +47,12 @@ class __FormState extends State<_Form> {
   final lastNameCtrl = TextEditingController();
   final emailCtrl = TextEditingController();
   final passwordCtrl = TextEditingController();
-  final confirmPasswordCtrl = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
+
+    final authService = Provider.of<AuthService>(context);
+    
     return Container(
       margin: const EdgeInsets.only(top: 40),
       padding: const EdgeInsets.symmetric(horizontal: 50),
@@ -80,20 +85,27 @@ class __FormState extends State<_Form> {
             isPassword: true
           ),
 
-          CustomInput(
-            icon: Icons.mail_outline, 
-            placeholder: 'Confirm password', 
-            textController: confirmPasswordCtrl,
-            isPassword: true
+          BlueButton(
+            text: 'Create account', 
+            onPressed: authService.authenticating ? null : () async {
+              print(firstNameCtrl.text);
+              print(lastNameCtrl.text);
+              print(emailCtrl.text);
+              print(passwordCtrl.text);
+              FocusScope.of(context).unfocus();
+              final registerOk = await authService.register(
+                firstNameCtrl.text.trim(),
+                lastNameCtrl.text.trim(),
+                emailCtrl.text.trim(), 
+                passwordCtrl.text.trim()
+              );
+              if(registerOk == true) {
+                Navigator.pushReplacementNamed(context, 'users');
+              } else {
+                showAlert(context, 'Incorrect register', registerOk);
+              }
+            }
           ),
-
-          BlueButton(text: 'Login', onPressed: () {
-            print(firstNameCtrl.text);
-            print(lastNameCtrl.text);
-            print(emailCtrl.text);
-            print(passwordCtrl.text);
-            print(confirmPasswordCtrl.text);
-          }),
 
         ],
       ),

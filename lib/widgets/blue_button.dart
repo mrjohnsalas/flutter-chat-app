@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 class BlueButton extends StatelessWidget {
 
   final String text;
-  final Function() onPressed;
+  final Function()? onPressed;
 
   const BlueButton({
-    super.key, required this.text, required this.onPressed,
+    super.key, required this.text, this.onPressed,
   });
 
   @override

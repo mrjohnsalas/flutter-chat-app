@@ -1,4 +1,6 @@
+import 'package:chat_app/services/auth_service.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 import '../models/models.dart';
@@ -14,30 +16,36 @@ class UsersPage extends StatefulWidget {
 class _UsersPageState extends State<UsersPage> {
 
   final users = [
-    User(uid:  '1', firstName: 'Maria', lastName: 'Anaya', email: 'user1@test.com', onLine: true),
-    User(uid:  '2', firstName: 'Jose', lastName: 'Cardenas', email: 'user2@test.com', onLine: false),
-    User(uid:  '3', firstName: 'Pedro', lastName: 'Medina', email: 'user3@test.com', onLine: true),
-    User(uid:  '4', firstName: 'Juan', lastName: 'Espinoza', email: 'user4@test.com', onLine: true),
-    User(uid:  '5', firstName: 'Carlos', lastName: 'Cordova', email: 'user5@test.com', onLine: false),
-    User(uid:  '6', firstName: 'Luis', lastName: 'Castillo', email: 'user6@test.com', onLine: true),
-    User(uid:  '7', firstName: 'Ana', lastName: 'Silva', email: 'user7@test.com', onLine: false),
-    User(uid:  '8', firstName: 'Sofia', lastName: 'Carrillo', email: 'user8@test.com', onLine: false),
-    User(uid:  '9', firstName: 'Luisa', lastName: 'Durand', email: 'user9@test.com', onLine: true),
-    User(uid: '10', firstName: 'Laura', lastName: 'Ramos', email: 'user10@test.com', onLine: true)
+    //User(uid:  '1', firstName: 'Maria', lastName: 'Anaya', email: 'user1@test.com', onLine: true),
+    //User(uid:  '2', firstName: 'Jose', lastName: 'Cardenas', email: 'user2@test.com', onLine: false),
+    //User(uid:  '3', firstName: 'Pedro', lastName: 'Medina', email: 'user3@test.com', onLine: true),
+    //User(uid:  '4', firstName: 'Juan', lastName: 'Espinoza', email: 'user4@test.com', onLine: true),
+    //User(uid:  '5', firstName: 'Carlos', lastName: 'Cordova', email: 'user5@test.com', onLine: false),
+    //User(uid:  '6', firstName: 'Luis', lastName: 'Castillo', email: 'user6@test.com', onLine: true),
+    //User(uid:  '7', firstName: 'Ana', lastName: 'Silva', email: 'user7@test.com', onLine: false),
+    //User(uid:  '8', firstName: 'Sofia', lastName: 'Carrillo', email: 'user8@test.com', onLine: false),
+    //User(uid:  '9', firstName: 'Luisa', lastName: 'Durand', email: 'user9@test.com', onLine: true),
+    //User(uid: '10', firstName: 'Laura', lastName: 'Ramos', email: 'user10@test.com', onLine: true)
   ];
 
   RefreshController _refreshController = RefreshController(initialRefresh: false);
 
   @override
   Widget build(BuildContext context) {
+
+    final authService = Provider.of<AuthService>(context);
+    
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Users Page', style: TextStyle(color: Colors.black54)),
+        title: Text(authService.user!.fullName, style: const TextStyle(color: Colors.black54)),
         elevation: 1,
         backgroundColor: Colors.white,
         leading: IconButton(
           icon: const Icon(Icons.exit_to_app, color: Colors.black54),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            Navigator.pushReplacementNamed(context, 'login');
+            authService.logout();
+          },
         ),
         actions: [
           Container(
@@ -85,7 +93,7 @@ class _UsersPageState extends State<UsersPage> {
         width: 10,
         height: 10,
         decoration: BoxDecoration(
-          color: user.onLine ? Colors.green[300] : Colors.red,
+          color: user.online ? Colors.green[300] : Colors.red,
           borderRadius: BorderRadius.circular(100)
         ),
       )
