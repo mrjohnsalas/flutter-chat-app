@@ -1,9 +1,9 @@
-import 'package:chat_app/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 import '../models/models.dart';
+import '../services/services.dart';
 
 class UsersPage extends StatefulWidget {
 
@@ -15,25 +15,21 @@ class UsersPage extends StatefulWidget {
 
 class _UsersPageState extends State<UsersPage> {
 
-  final users = [
-    //User(uid:  '1', firstName: 'Maria', lastName: 'Anaya', email: 'user1@test.com', onLine: true),
-    //User(uid:  '2', firstName: 'Jose', lastName: 'Cardenas', email: 'user2@test.com', onLine: false),
-    //User(uid:  '3', firstName: 'Pedro', lastName: 'Medina', email: 'user3@test.com', onLine: true),
-    //User(uid:  '4', firstName: 'Juan', lastName: 'Espinoza', email: 'user4@test.com', onLine: true),
-    //User(uid:  '5', firstName: 'Carlos', lastName: 'Cordova', email: 'user5@test.com', onLine: false),
-    //User(uid:  '6', firstName: 'Luis', lastName: 'Castillo', email: 'user6@test.com', onLine: true),
-    //User(uid:  '7', firstName: 'Ana', lastName: 'Silva', email: 'user7@test.com', onLine: false),
-    //User(uid:  '8', firstName: 'Sofia', lastName: 'Carrillo', email: 'user8@test.com', onLine: false),
-    //User(uid:  '9', firstName: 'Luisa', lastName: 'Durand', email: 'user9@test.com', onLine: true),
-    //User(uid: '10', firstName: 'Laura', lastName: 'Ramos', email: 'user10@test.com', onLine: true)
-  ];
+  List<User> users = [];
 
-  RefreshController _refreshController = RefreshController(initialRefresh: false);
+  final RefreshController _refreshController = RefreshController(initialRefresh: false);
+
+  @override
+  void initState() {
+    _loadUsers();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
 
     final authService = Provider.of<AuthService>(context);
+    final socketService = Provider.of<SocketService>(context);
     
     return Scaffold(
       appBar: AppBar(
@@ -43,6 +39,7 @@ class _UsersPageState extends State<UsersPage> {
         leading: IconButton(
           icon: const Icon(Icons.exit_to_app, color: Colors.black54),
           onPressed: () {
+            socketService.disconnect();
             Navigator.pushReplacementNamed(context, 'login');
             authService.logout();
           },
@@ -50,9 +47,9 @@ class _UsersPageState extends State<UsersPage> {
         actions: [
           Container(
             margin: const EdgeInsets.only(right: 10),
-            child: const Icon(Icons.check_circle, color: Colors.blue),
-            // child: const Icon(Icons.offline_bolt, color: Colors.red),
-            // child: const Icon(Icons.offline_bolt, color: Colors.grey),
+            child: socketService.serverStatus == ServerStatus.Online
+              ? const Icon(Icons.check_circle, color: Colors.blue)
+              : const Icon(Icons.offline_bolt, color: Colors.red)
           )
         ],
       ),
@@ -87,7 +84,7 @@ class _UsersPageState extends State<UsersPage> {
       subtitle: Text(user.email),
       leading: CircleAvatar(
         backgroundColor: Colors.blue[100],
-        child: Text(user.firstName.substring(0, 2)),
+        child: Text(user.initials),
       ),
       trailing: Container(
         width: 10,
@@ -96,7 +93,18 @@ class _UsersPageState extends State<UsersPage> {
           color: user.online ? Colors.green[300] : Colors.red,
           borderRadius: BorderRadius.circular(100)
         ),
-      )
+      ),
+      onTap: () {
+        final chatService = Provider.of<ChatService>(context, listen: false);
+        chatService.userTo = user;
+        Navigator.pushNamed(context, 'chat');
+      },
     );
+  }
+
+  _loadUsers() async {
+    users = await UserService().getUsers();
+    setState(() { });
+    _refreshController.refreshCompleted();
   }
 }

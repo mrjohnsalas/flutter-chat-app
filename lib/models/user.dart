@@ -11,6 +11,10 @@ class User {
       return '$firstName $lastName';
     }
 
+    get initials {
+      return '${firstName.substring(0, 1)}${lastName.substring(0, 1)}';
+    }
+
     User({
         required this.firstName,
         required this.lastName,

@@ -52,6 +52,7 @@ class __FormState extends State<_Form> {
   Widget build(BuildContext context) {
 
     final authService = Provider.of<AuthService>(context);
+    final socketService = Provider.of<SocketService>(context);
     
     return Container(
       margin: const EdgeInsets.only(top: 40),
@@ -100,6 +101,7 @@ class __FormState extends State<_Form> {
                 passwordCtrl.text.trim()
               );
               if(registerOk == true) {
+                socketService.connect();
                 Navigator.pushReplacementNamed(context, 'users');
               } else {
                 showAlert(context, 'Incorrect register', registerOk);
